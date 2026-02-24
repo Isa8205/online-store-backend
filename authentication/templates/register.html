@@ -1,0 +1,93 @@
+<!-- register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    form {
+      background: white;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 1em;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5em;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.6em;
+      margin-bottom: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    input[type="submit"] {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    input[type="submit"]:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <h2>Register</h2>
+
+    <label for="">First Name</label>
+    <input type="text" name="first_name">
+
+    <label for="">Middle Name</label>
+    <input type="text" name="middle_name">    
+    
+    <label for="">Last Name</label>
+    <input type="text" name="last_name">
+    
+    <label for="email">Email</label>
+    <input type="email" name="email" required>
+
+    <label for="username">Username</label>
+    <input type="text" name="username" required>
+    
+    <label for="phone">Phone</label>
+    <input type="number" name="phone">
+
+    <!-- <label for="avatar">Avatar</label>
+    <input type="file" name="avatar"> -->
+
+    <label for="password1">Password</label>
+    <input type="password" name="password1" required>
+
+    <label for="password2">Confirm Password</label>
+    <input type="password" name="password2" required>
+
+    <input type="submit" value="Register">
+  </form>
+</body>
+</html>
