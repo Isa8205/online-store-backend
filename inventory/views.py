@@ -9,23 +9,17 @@ from rest_framework import status
 # Create your views here.
 class ProductsView(APIView):    
     def get(self, request):
-        products = Product.objects.select_related('category').all()
-        serializer = ProductSerializer(products, many=True)
+        products = Product.objects.select_related('category').prefetch_related('images').all()
+        serializer = ProductSerializer(products, many=True, context={ 'request': request })
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        print(request.data)
         serializer = ProductAddSerializer(data=request.data)
 
-        if serializer.is_valid():
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-            with transaction.atomic():
-                serializer.save()
-
-            return Response({"message": "The data was received and saved on the server!"}, status=status.HTTP_201_CREATED)
-        
-        print(f"Errors occured: {serializer.errors}")
-        return Response({"Message": "Encountered an error. Please try again."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "The data was received and saved on the server!"}, status=status.HTTP_201_CREATED)
         
 class CategoriesView(APIView):    
     def get(self, request):

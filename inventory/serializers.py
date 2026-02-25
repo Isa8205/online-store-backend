@@ -9,6 +9,7 @@ class CategoryMiniSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     category = CategoryMiniSerializer(read_only=True)
+    images = serializers.SerializerMethodField()
     class Meta:
         model=Product
         fields=[
@@ -25,9 +26,16 @@ class ProductSerializer(serializers.ModelSerializer):
             "weight",
             "weight_unit",
             "meta_title",
-            "meta_description"
+            "meta_description",
+            "images",
         ]
         read_only_fields=["id"]
+
+    def get_images(self, obj):
+        request = self.context.get('request')
+
+        return [request.build_absolute_uri(img.image.url) for img in obj.images.all()]
+
 
 class ProductAddSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
@@ -41,6 +49,7 @@ class ProductAddSerializer(serializers.ModelSerializer):
         fields=[
             "name",
             "category",
+            "quantity",
             "price",
             "status",
             "sku",
@@ -54,13 +63,12 @@ class ProductAddSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         images = validated_data.pop("images", [])
-        print(validated_data)
 
         with transaction.atomic():
             product = Product.objects.create(**validated_data)
 
             for image in images:
-                ProductImage.objects.create(category=product, image=image)
+                ProductImage.objects.create(product=product, image=image)
 
         return product
 
