@@ -3,7 +3,7 @@ from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Category, Product, ProductImage
-from .serializers import CategorySerializer, ProductSerializer, ProductAddSerializer
+from .serializers import CategorySerializer, ProductSerializer, ProductAddSerializer, ProductVariantAddSerializer
 from rest_framework import status
 
 # Create your views here.
@@ -20,7 +20,19 @@ class ProductsView(APIView):
         serializer.save()
 
         return Response({"message": "The data was received and saved on the server!"}, status=status.HTTP_201_CREATED)
-        
+       
+class ProductVariantView(APIView):
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        serializer = ProductVariantAddSerializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({"message": "Product variant added successfully"})
+
 class CategoriesView(APIView):    
     def get(self, request):
         categories = Category.objects.all()

@@ -186,7 +186,7 @@ class ProductVariant(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name='product_variants'
+        related_name='product_variant'
     )
     
     is_active = models.BooleanField(default=True)
