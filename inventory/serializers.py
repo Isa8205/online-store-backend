@@ -21,6 +21,8 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     category = CategoryMiniSerializer(read_only=True)
     images = serializers.SerializerMethodField()
+    variants = serializers.SerializerMethodField()
+
     class Meta:
         model=Product
         fields=[
@@ -39,8 +41,18 @@ class ProductSerializer(serializers.ModelSerializer):
             "meta_title",
             "meta_description",
             "images",
+            "variants",
         ]
         read_only_fields=["id"]
+
+    # Note: Since the ProductVariantGetSerializer will not be available at interpretation time.
+    # use this method to wait untill it is loaded then import and get it.
+    def get_variants(self, obj):
+        from .serializers import ProductVariantGetSerializer
+        return ProductVariantGetSerializer(
+                obj.variants.all(),
+                many=True
+            ).data
 
     def get_images(self, obj):
         request = self.context.get('request')
@@ -88,26 +100,34 @@ class ProductAddSerializer(serializers.ModelSerializer):
 class ProductVariantBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model=ProductVariant
-        fields=["name", "sku", "price", "quantity", "size", "color", "material", "is_active", "images"]
+        fields=["name", "sku", "price", "quantity", "size", "color", "material", "image", "is_active"]
 
 class ProductVariantAddSerializer(ProductVariantBaseSerializer):
-    images = serializers.ListField(
-        child=serializers.ImageField(),
-        write_only=True,
-        required=False
-    )
+    product_id = serializers.UUIDField(write_only=True)
+
+    class Meta(ProductVariantBaseSerializer.Meta):
+        fields = ProductVariantBaseSerializer.Meta.fields + [
+                "product_id"
+        ]
 
     @transaction.atomic
     def create(self, validated_data):
-        product_id = validated_data.pop("product_id", None)
-        images = validated_data.pop("images", None)
+        product_id = validated_data.pop("product_id")
 
-        print(product_id)
         product = Product.objects.get(id=product_id)
 
-        if product:
-            new_prod_variant = ProductVariant.create(product=product, **validated_data)
+        variant = ProductVariant.objects.create(
+            product=product,
+            **validated_data
+        )
 
-            for image in images:
-                ProductImage.objects.create(product_variant=new_prod_variant, image=image)
+        return variant
 
+class ProductVariantGetSerializer(ProductVariantBaseSerializer):
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        return None

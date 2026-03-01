@@ -7,12 +7,13 @@ from .serializers import CategorySerializer, ProductSerializer, ProductAddSerial
 from rest_framework import status
 
 # Create your views here.
-class ProductsView(APIView):    
+class ProductsView(APIView):
     def get(self, request):
-        products = Product.objects.select_related('category').prefetch_related('images').all()
-        serializer = ProductSerializer(products, many=True, context={ 'request': request })
+        products = Product.objects.prefetch_related("variants")
+        serializer = ProductSerializer(products, context={ 'request': request }, many=True)
+
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def post(self, request):
         serializer = ProductAddSerializer(data=request.data)
 
@@ -22,8 +23,6 @@ class ProductsView(APIView):
         return Response({"message": "The data was received and saved on the server!"}, status=status.HTTP_201_CREATED)
        
 class ProductVariantView(APIView):
-    def get(self, request):
-        pass
 
     def post(self, request):
         serializer = ProductVariantAddSerializer(data=request.data)

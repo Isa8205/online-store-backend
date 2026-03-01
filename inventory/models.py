@@ -166,7 +166,7 @@ class ProductVariant(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     
-    name = models.CharField(max_length=100)  # e.g., "Small / Red"
+    name = models.CharField(max_length=100)
     sku = models.CharField(max_length=100, unique=True)
     
     # Variant-specific pricing (optional override)
@@ -181,13 +181,7 @@ class ProductVariant(models.Model):
     color = models.CharField(max_length=50, blank=True, null=True)
     material = models.CharField(max_length=50, blank=True, null=True)
     
-    image = models.ForeignKey(
-        ProductImage,
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-        related_name='product_variant'
-    )
+    image = models.ImageField(upload_to="uploads/products", blank=True, null=True)
     
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
